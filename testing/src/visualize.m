@@ -1,10 +1,15 @@
-function visualize(test_image, heatMaps, predict, param, rectangle, interestPart)
+function visualize(test_image, heatMaps, predict, param, rectangle, interestPart, video)
 
 model = param.model(param.modelID);
 np = model.np;
 part_str = model.part_str;
 nstage = model.stage;
-im = imread(test_image);
+if (video == 1)
+    im = test_image;
+else
+    im = imread(test_image);
+end
+
 facealpha = 0.6; % for limb transparency
 [x_start, x_end, y_start, y_end] = get_display_range(rectangle, im);
 predict = bsxfun(@minus, predict, [x_start, y_start]); % offset due to display range

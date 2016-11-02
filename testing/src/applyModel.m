@@ -1,11 +1,26 @@
-function [heatMaps, prediction] = applyModel(test_image, param, rectangle)
+function [heatMaps, prediction] = applyModel(test_image, param, rectangle, video)
 
 %% Select model and other parameters from param
 model = param.model(param.modelID);
 boxsize = model.boxsize;
 np = model.np;
 nstage = model.stage;
+if (video == 0)
 oriImg = imread(test_image);
+else
+    oriImg = test_image;
+end
+
+%caffe.set_mode_cpu();
+
+% Set caffe mode
+% if exist('use_gpu', 'var') && use_gpu
+%   caffe.set_mode_gpu();
+%   gpu_id = 0;  % we will use the first gpu in this demo
+%   caffe.set_device(gpu_id);
+% else
+%   caffe.set_mode_cpu();
+% end
 
 %% Apply model, with searching thourgh a range of scales
 octave = param.octave;
@@ -24,6 +39,7 @@ ending_range = middle_range * 3.0;
 starting_scale = boxsize/(size(oriImg,1)*ending_range);
 ending_scale = boxsize/(size(oriImg,1)*starting_range);
 multiplier = 2.^(log2(starting_scale):(1/octave):log2(ending_scale));
+%multiplier = 1;
 
 % data container for each scale and stage
 score = cell(nstage, length(multiplier));
@@ -31,6 +47,7 @@ pad = cell(1, length(multiplier));
 ori_size = cell(1, length(multiplier));
 
 net = caffe.Net(model.deployFile, model.caffemodel, 'test');
+
 % change outputs to enable visualizing stagewise results
 % note this is why we keep out own copy of m-files of caffe wrapper
 
@@ -44,12 +61,12 @@ for m = 1:length(multiplier)
     [imageToTest, pad{m}] = padAround(imageToTest, boxsize, center_s, model.padValue); % into boxsize, which is multipler of 4
     
     % plot bbox indicating what actually goes into CPM
-    figure(1);
-    pad_current = pad{m};
-    x = [0-pad_current(2), size(oriImg,2)*scale + pad_current(4)]/scale;
-    y = [0-pad_current(1), size(oriImg,1)*scale + pad_current(3)]/scale;
-    plot([x(1) x(1) x(2) x(2) x(1)], [y(1) y(2) y(2) y(1) y(1)], 'Color', colors(m,:));
-    drawnow;
+    %figure(1);
+    %pad_current = pad{m};
+    %x = [0-pad_current(2), size(oriImg,2)*scale + pad_current(4)]/scale;
+    %y = [0-pad_current(1), size(oriImg,1)*scale + pad_current(3)]/scale;
+    %plot([x(1) x(1) x(2) x(2) x(1)], [y(1) y(2) y(2) y(1) y(1)], 'Color', colors(m,:));
+    %drawnow;
     % figure(m+2); imshow(imageToTest);
     
     imageToTest = preprocess(imageToTest, 0.5, param);

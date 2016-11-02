@@ -1,6 +1,5 @@
 function param = config()
 %% set this part
-
 % CPU mode (0) or GPU mode (1)
 % friendly warning: CPU mode may take a while
 param.use_gpu = 1;
